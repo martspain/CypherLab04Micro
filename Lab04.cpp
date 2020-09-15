@@ -7,7 +7,7 @@ Universidad Del Valle de Guatemala
 
 Autores:
 - Sofía Rueda			Carné: 19099
-- Diego Ruiz			Carné: 1
+- Diego Ruiz			Carné: 18761
 - Martín España 		Carné: 19258
 
 Fecha de creación: 13/09/2020
@@ -36,7 +36,8 @@ using namespace std;
 string const fileName = "FUENTE.txt";	//Nombre del archivo fuente
 string const keyWord = "Gu4T"; 			//Palabra clave de cifrado
 string cypherDone = "";					//Variable que almacenara el texto cifrado
-int bufferLength = 8;					//Espacio del buffer (cuantas letras se cifran seguidas)
+int const bufferLength = 8;				//Espacio del buffer (cuantas letras se cifran seguidas)
+int const threadCount = 4;				//Numero de threads utilizados
 
 //Subrutina para leer el archivo fuente y convertirlo a un string
 string readFile(){
@@ -66,10 +67,14 @@ string readFile(){
 void *cypherText(void *argument){
 	//Se hace la conversion del argumento a un string y se guarda en oldString
 	string &oldString = *(static_cast<string*>(argument));
+	string newString == "";
 	
-	//PRUEBA
-	cypherDone += oldString;
+	//Se hace el cifrado
 	
+	
+	//Se añade el string cifrado al texto global cifrado
+	cypherDone += newString;
+	//Se finaliza el thread
 	pthread_exit(NULL);
 
 }
@@ -77,7 +82,6 @@ void *cypherText(void *argument){
 //Main
 int main(){
 	
-	int a = 0; //contador de las 8 letras
 	int rc;
 	int option;
 	string text;
@@ -89,7 +93,7 @@ int main(){
 	cout<<"Programación de Microprocesadores"<<endl;
 	cout<<"Laboratorio 4: Cifrado de textos"<<endl;
 	cout<<"Autores: \nSofía Rueda	Carné: 19099"<<endl;
-	cout<<"Diego Ruiz	Carné: 1 \nMartín España	Carné: 19258"<<endl;
+	cout<<"Diego Ruiz	Carné: 18761 \nMartín España	Carné: 19258"<<endl;
 	
 	while(active){
 		cout<<"\nMenu de Opciones \n¿Qué desea hacer? \n1. Cifrar texto. \n2. Descifrar texto. \n3. Salir."<<endl;
@@ -103,7 +107,48 @@ int main(){
 			else{
 
 				string temporary = "";
-
+				int letterGroups;
+				int a = 0; //contador de las 8 letras
+				int rept;
+				
+				//Se determina cuantos grupos de caracteres se crearan a partir del tamaño del buffer definido
+				if(((text.length())%bufferLength)>0){
+					letterGroups = (int)(text.length()/bufferLength)+1;
+				}
+				else{
+					letterGroups = (int)(text.length()/bufferLength);
+				}
+				
+				string collection [letterGroups];
+				
+				//Se recorre el texto y se separa en sus respectivos grupos, los cuales se almacenan en collection
+				for(int i=0;i<letterGroups;i++){
+					rept = 0;
+					
+					if((a+bufferLength-1)>(text.length()-1)){
+						while(rept < bufferLength && (a+rept)<(text.length()-1)){
+							temporary += text[a+rept];
+							rept++;
+						}
+					}
+					else{
+						while(rept < bufferLength){
+							temporary += text[a+rept];
+							rept++;
+						}
+					}
+					
+					collection[i] = temporary;
+					a+=bufferLength;
+					temporary = "";
+				}
+				
+				/******************************************************
+				IMPORTANTE: EN ESTE PUNTO, TODOS LOS GRUPOS DE 8 CARACTERES ESTAN EN EL ARRAY "COLLECTION"
+				******************************************************/
+				
+				
+				/*
 				//For loop donde se crean los threads que cifraran los grupos de 8 caracteres
 				for(int i = 0; i<text.length();i++){
 
@@ -135,6 +180,7 @@ int main(){
 						a++;
 					}
 				}
+				*/
 			}
 			cout<<cypherDone<<endl;
 		}
