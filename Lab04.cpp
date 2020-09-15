@@ -28,18 +28,25 @@ Laboratorio 4: Cifrado de textos
 #include <fstream> 		//file processing
 #include <stdlib.h>		//binary conversion
 #include <string>		//string usage
-#include<sstream>		//string input/output
+#include <sstream>		//string input/output
+#include <vector>		//dinamic arrays
+#include <unistd.h>		//usleep
 
 using namespace std;
 
-//Variables globales
+/*******************
+Variables globales
+*******************/
 string const fileName = "FUENTE.txt";	//Nombre del archivo fuente
 string const keyWord = "Gu4T"; 			//Palabra clave de cifrado
 string cypherDone = "";					//Variable que almacenara el texto cifrado
 int const bufferLength = 8;				//Espacio del buffer (cuantas letras se cifran seguidas)
 int const threadCount = 4;				//Numero de threads utilizados
 
-//Subrutina para leer el archivo fuente y convertirlo a un string
+
+/***************************************************************
+Subrutina para leer el archivo fuente y convertirlo a un string
+***************************************************************/
 string readFile(){
 	//Se crea el stream para leer el archivo fuente
 	ifstream fileStream(fileName,ios::in);
@@ -67,10 +74,11 @@ string readFile(){
 void *cypherText(void *argument){
 	//Se hace la conversion del argumento a un string y se guarda en oldString
 	string &oldString = *(static_cast<string*>(argument));
-	string newString == "";
+	string newString = "";
 	
+	//*******************
 	//Se hace el cifrado
-	
+	//*******************
 	
 	//Se añade el string cifrado al texto global cifrado
 	cypherDone += newString;
@@ -143,21 +151,27 @@ int main(){
 					temporary = "";
 				}
 				
-				/******************************************************
+				/*****************************************************************************************
 				IMPORTANTE: EN ESTE PUNTO, TODOS LOS GRUPOS DE 8 CARACTERES ESTAN EN EL ARRAY "COLLECTION"
-				******************************************************/
+				*****************************************************************************************/
 				
+				//Se crea un vector con los grupos de caracteres
+				vector<string> stack;
+				for(int i=0;i<letterGroups;i++){
+					stack.push_back(collection[i]);
+				}
 				
-				/*
-				//For loop donde se crean los threads que cifraran los grupos de 8 caracteres
-				for(int i = 0; i<text.length();i++){
-
-					temporary += text[i];
-					
-					if(a == (bufferLength-1)){
-						//Se reinicia el contador de caracteres
-						a==0;
+				/******************************************************
+				FUNCIONA PERO NO LO MUESTRA EN ORDEN (HACEN FALTA MUTEX)
+				*******************************************************
+				while(stack.size()>0){
+					for(int j=0;j<threadCount && stack.size()>0;j++){
+						
+						temporary = stack.back();
+						stack.pop_back();
+						
 						rc = pthread_create(&threadID,NULL,cypherText,static_cast<void*>(&temporary));
+						usleep(1000);
 						
 						//Se verifica que no hubo errores
 						if(rc){
@@ -173,14 +187,10 @@ int main(){
 							printf("ERROR; return code from pthread_join() is %d\n", rc);
 							exit(-1);
 						}
-						
-						temporary = "";
-					}
-					else{
-						a++;
 					}
 				}
-				*/
+				********************************************************/
+				
 			}
 			cout<<cypherDone<<endl;
 		}
@@ -193,35 +203,5 @@ int main(){
 		}
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	exit(0);
 }
