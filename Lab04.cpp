@@ -26,11 +26,12 @@ Laboratorio 4: Cifrado de textos
 #include <ctime>		//time_t, clock, difftime
 #include <pthread.h>	//treads
 #include <fstream> 		//file processing
-#include <stdlib.h>		//binary conversion
+#include <stdlib.h>		//binary convertion
 #include <string>		//string usage
 #include <sstream>		//string input/output
 #include <vector>		//dinamic arrays
 #include <unistd.h>		//usleep
+#include <bitset>		//binary convertion
 
 using namespace std;
 
@@ -74,7 +75,9 @@ string readFile(){
 void *cypherText(void *argument){
 	//Se hace la conversion del argumento a un string y se guarda en oldString
 	string &oldString = *(static_cast<string*>(argument));
-	string newString = "";
+	
+	//PRUEBA: AQUI DEBE DECIR:" string newString = "";
+	string newString = oldString;
 	
 	//*******************
 	//Se hace el cifrado
@@ -86,6 +89,11 @@ void *cypherText(void *argument){
 	pthread_exit(NULL);
 
 }
+
+/*Subrutina para convertir el string pasado en el argumento a un conjunto de bits, 
+ *realizar la operacion logica xor entre los ultimos 4 digitos y la palabra llave,
+ *y regresar el binario modificado 
+ */
 
 //Main
 int main(){
@@ -163,7 +171,7 @@ int main(){
 				
 				/******************************************************
 				FUNCIONA PERO NO LO MUESTRA EN ORDEN (HACEN FALTA MUTEX)
-				*******************************************************
+				*******************************************************/
 				while(stack.size()>0){
 					for(int j=0;j<threadCount && stack.size()>0;j++){
 						
@@ -189,7 +197,7 @@ int main(){
 						}
 					}
 				}
-				********************************************************/
+				//********************************************************/
 				
 			}
 			cout<<cypherDone<<endl;
