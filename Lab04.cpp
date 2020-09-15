@@ -65,18 +65,18 @@ string readFile(){
 //Subrutina para cifrar un string de 8 caracteres (Aquí se utiliza el XOR con cada pthread)
 void *cypherText(void *argument){
 	//Se hace la conversion del argumento a un string y se guarda en oldString
-	string *sp = static_cast<string*>(argument);
-	string oldString = *sp;
-	delete sp;
+	string &oldString = *(static_cast<string*>(argument));
 	
-	//CONTINUAR
+	//PRUEBA
+	cypherDone += oldString;
+	
+	pthread_exit(NULL);
 
 }
 
 //Main
 int main(){
 	
-	int i = 0; //contador del for loop
 	int a = 0; //contador de las 8 letras
 	int rc;
 	int option;
@@ -92,7 +92,7 @@ int main(){
 	cout<<"Diego Ruiz	Carné: 1 \nMartín España	Carné: 19258"<<endl;
 	
 	while(active){
-		cout<<"\nMenu de Opciones \n¿Qué desea hacer? \n1. Cifrar texto. \n2. Descifrar texto. \n3. Salir"<<endl;
+		cout<<"\nMenu de Opciones \n¿Qué desea hacer? \n1. Cifrar texto. \n2. Descifrar texto. \n3. Salir."<<endl;
 		cin>>option;
 		
 		//Si se elige cifrar el texto
@@ -101,15 +101,18 @@ int main(){
 				cout<<"El archivo "<<fileName<<" esta vacio."<<endl;
 			}
 			else{
+
+				string temporary = "";
+
 				//For loop donde se crean los threads que cifraran los grupos de 8 caracteres
-				for(i; i<text.length();i++){
-					string temporary = "";
+				for(int i = 0; i<text.length();i++){
+
 					temporary += text[i];
 					
 					if(a == (bufferLength-1)){
 						//Se reinicia el contador de caracteres
 						a==0;
-						rc = pthread_create(&threadID,NULL,cypherText,(void *)temporary);
+						rc = pthread_create(&threadID,NULL,cypherText,static_cast<void*>(&temporary));
 						
 						//Se verifica que no hubo errores
 						if(rc){
@@ -143,7 +146,7 @@ int main(){
 			active = false;
 		}
 	}
-}
+
 	
 	
 	
