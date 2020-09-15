@@ -130,11 +130,6 @@ void *cypherText(void *argument){
 
 }
 
-/*Subrutina para convertir el string pasado en el argumento a un conjunto de bits, 
- *realizar la operacion logica xor entre los ultimos 4 digitos y la palabra llave,
- *y regresar el binario modificado 
- */
-
 //Main
 int main(){
 	
@@ -203,7 +198,7 @@ int main(){
 				IMPORTANTE: EN ESTE PUNTO, TODOS LOS GRUPOS DE 8 CARACTERES ESTAN EN EL ARRAY "COLLECTION"
 				*****************************************************************************************/
 				
-				//Se crea un vector con los grupos de caracteres
+				//Se crea un vector con los grupos de caracteres (STACK FIFO)
 				vector<string> stack;
 				for(int i=0;i<letterGroups;i++){
 					stack.push_back(collection[i]);
