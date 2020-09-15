@@ -32,6 +32,7 @@ Laboratorio 4: Cifrado de textos
 #include <vector>		//dinamic arrays
 #include <unistd.h>		//usleep
 #include <bitset>		//binary convertion
+#include <semaphore.h>  //semaphore 
 
 using namespace std;
 
@@ -43,6 +44,8 @@ string const keyWord = "Gu4T"; 			//Palabra clave de cifrado
 string cypherDone = "";					//Variable que almacenara el texto cifrado
 int const bufferLength = 8;				//Espacio del buffer (cuantas letras se cifran seguidas)
 int const threadCount = 4;				//Numero de threads utilizados
+int counter=0;
+sem_t count_sem, barrier_sem, done_sem;
 
 
 /***************************************************************
@@ -75,16 +78,53 @@ string readFile(){
 void *cypherText(void *argument){
 	//Se hace la conversion del argumento a un string y se guarda en oldString
 	string &oldString = *(static_cast<string*>(argument));
-	
-	//PRUEBA: AQUI DEBE DECIR:" string newString = "";
-	string newString = oldString;
+	string newString = "";
+	string newStringTwo = "";
 	
 	//*******************
 	//Se hace el cifrado
 	//*******************
+	int a=0;
+	//For que incluye los ultimos cuatro caracteres del string (Ronda 1)
+	for(int i=bufferLength-4;i<bufferLength;i++){
+		newString += (oldString[i]^keyWord[a]);
+		a++;
+	}
+	for(int j=0;j<bufferLength-4;j++){
+		newString += oldString[j];
+	}
+	//Ronda 2
+	oldString="";
+	a=0;
+	for(int i=bufferLength-4;i<bufferLength;i++){
+		oldString += (newString[i]^keyWord[a]);
+	}
+	for(int j=0;j<bufferLength-4;j++){
+		oldString += newString[j];
+	}
+	//Ronda 3
+	newString="";
+	a=0;
+	for(int i=bufferLength-4;i<bufferLength;i++){
+		newString += (oldString[i]^keyWord[a]);
+	}
+	for(int j=0;j<bufferLength-4;j++){
+		newString += oldString[j];
+	}
+	//Ronda 4
+	oldString="";
+	a=0;
+	for(int i=bufferLength-4;i<bufferLength;i++){
+		oldString += (newString[i]^keyWord[a]);
+	}
+	for(int j=0;j<bufferLength-4;j++){
+		oldString += newString[j];
+	}
+	
 	
 	//Se añade el string cifrado al texto global cifrado
-	cypherDone += newString;
+	cypherDone += oldString;
+
 	//Se finaliza el thread
 	pthread_exit(NULL);
 
@@ -112,7 +152,7 @@ int main(){
 	cout<<"Diego Ruiz	Carné: 18761 \nMartín España	Carné: 19258"<<endl;
 	
 	while(active){
-		cout<<"\nMenu de Opciones \n¿Qué desea hacer? \n1. Cifrar texto. \n2. Descifrar texto. \n3. Salir."<<endl;
+		cout<<"\nMenu de Opciones \n¿Qué desea hacer? \n1. Cifrar texto. \n2. Salir."<<endl;
 		cin>>option;
 		
 		//Si se elige cifrar el texto
@@ -199,15 +239,27 @@ int main(){
 				}
 				//********************************************************/
 				
+				//**********************************************************
+				//Se crea el archivo de salida y se escribe el texto cifrado
+				ofstream outFile("salida.bin",ios::binary);
+				if(!outFile)
+				{
+					cerr<<"Error al crear salida.bin"<<endl;
+					exit(EXIT_FAILURE);
+				}
+				outFile<<cypherDone;
+				//**********************************************************
+				
 			}
-			cout<<cypherDone<<endl;
+			//Si sobrevive hasta aca, la operación fue exitosa
+			cout<<"El texto cifrado se ha escrito exitosamente."<<endl;
 		}
 		else if(option == 2){
-			cout<<"Opción 2"<<endl;
-		}
-		else if(option == 3){
 			cout<<"Gracias por utilizar el programa. ¡Vuelva pronto!"<<endl;
 			active = false;
+		}
+		else{
+			cout<<"Por favor, ingrese una opción válida"<<endl;
 		}
 	}
 
