@@ -44,7 +44,10 @@ string const keyWord = "Gu4T"; 			//Palabra clave de cifrado
 string cypherDone = "";					//Variable que almacenara el texto cifrado
 int const bufferLength = 8;				//Espacio del buffer (cuantas letras se cifran seguidas)
 int const threadCount = 4;				//Numero de threads utilizados
-int counter=0;
+/*----- Variables globales compartidas -----*/
+int counter = 0;
+pthread_cond_t cola_llena, cola_vacia; 
+pthread_mutex_t mutex_forvar; 
 sem_t count_sem, barrier_sem, done_sem;
 
 
@@ -74,12 +77,32 @@ string readFile(){
 	return result;
 }
 
+
 //Subrutina para cifrar un string de 8 caracteres (Aquí se utiliza el XOR con cada pthread)
 void *cypherText(void *argument){
 	//Se hace la conversion del argumento a un string y se guarda en oldString
 	string &oldString = *(static_cast<string*>(argument));
 	string newString = "";
 	string newStringTwo = "";
+
+	pthread_mutex_lock(&mutex_forvar);
+	counter++;
+
+	if(counter == threadCount){
+		counter = 0;
+
+		pthread_cond_broadcast(&cola_vacia);
+		pthread_cond_wait(&cola_llena, &mutex_forvar);
+		
+	}
+	else
+	{
+		counter++;
+	
+		
+		//while(pthread_cond_wait(&cola_llena, &mutex_forvar) != 0);
+	}
+
 	
 	//*******************
 	//Se hace el cifrado
@@ -120,12 +143,14 @@ void *cypherText(void *argument){
 	for(int j=0;j<bufferLength-4;j++){
 		oldString += newString[j];
 	}
-	
+
+	//SPFIAAAAAAA
 	
 	//Se añade el string cifrado al texto global cifrado
 	cypherDone += oldString;
 
 	//Se finaliza el thread
+	pthread_mutex_unlock(&mutex_forvar);
 	pthread_exit(NULL);
 
 }
@@ -139,6 +164,10 @@ int main(){
 	text = readFile();
 	bool active = true;
 	pthread_t threadID;
+
+	pthread_mutex_init(&mutex_forvar, NULL);
+	pthread_cond_init(&cola_llena, NULL); 
+	pthread_cond_init(&cola_vacia, NULL);
 	
 	cout<<"Universidad del Valle de Guatemala"<<endl;
 	cout<<"Programación de Microprocesadores"<<endl;
@@ -212,6 +241,7 @@ int main(){
 						
 						temporary = stack.back();
 						stack.pop_back();
+
 						
 						rc = pthread_create(&threadID,NULL,cypherText,static_cast<void*>(&temporary));
 						usleep(1000);
