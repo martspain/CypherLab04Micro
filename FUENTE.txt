@@ -1,1 +1,1 @@
-Hola como estas?
+Este Es El Texto Para Probar Implementacion De Barreras Usando Variables Condicionales.
